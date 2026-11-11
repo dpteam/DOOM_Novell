@@ -28,9 +28,26 @@
 renpy.exe "C:\path\to\DOOM_Novell" lint
 ```
 
-Lint не должен выдавать ошибок. Предупреждения про «file 'cyr26' is not
-loadable» означают, что `game/fonts/fonts.json` и сгенерированные `.fnt` не
-согласованы — пересоберите шрифты (см. ниже).
+Ожидаемый результат — отчёт без единой ошибки:
+
+```
+The game contains 373 dialogue blocks, containing 3,178 words ...
+The game contains 7 menus, 148 images, and 36 screens.
+```
+
+Есть и автоматический прогон по сценарию (меню → главы → концовка):
+
+```bash
+renpy.exe "C:\path\to\DOOM_Novell" test smoke
+```
+
+Он требует настоящего GPU/OpenGL: в виртуальных машинах без ускорения Ren'Py
+уходит в software-рендерер и падает на создании окна. Поэтому основной
+проверкой остаются `lint` и запуск вручную.
+
+Если игра запускается с чёрным экраном или показывает диалог «Renderer» —
+выберите **Force ANGLE2**: на удалённых сессиях без OpenGL это единственный
+рабочий вариант.
 
 ## Пересборка ассетов
 
@@ -42,6 +59,9 @@ python tools/build_assets.py --iwad D:\games\doom2\DOOM2.WAD --out .
 
 # только интерфейс и спрайты, без синтеза музыки (быстро)
 python tools/build_assets.py --iwad DOOM2.WAD --out . --skip-music
+
+# только пересобрать саундтрек
+python tools/build_assets.py --iwad DOOM2.WAD --out . --music-only
 ```
 
 После пересборки обновите список изображений:
@@ -84,12 +104,13 @@ renpy.exe "C:\path\to\DOOM_Novell" distribute --destination dist
 
 | Симптом | Причина | Решение |
 | --- | --- | --- |
-| `Could not find font 'cyr26'` | шрифт не зарегистрирован под этим размером | используйте размер из `game/fonts/fonts.json` |
+| `Could not find font 'fonts/cyr26.fnt'` | шрифт не зарегистрирован под этим размером | используйте размер из `game/fonts/fonts.json` |
+| Текст выглядит как сплошные прямоугольники | маска глифа записана только в альфу, а Ren'Py читает красный канал | пересоберите шрифты: `build_assets.py` пишет маску в RGB и в альфу |
 | Пустые прямоугольники вместо букв | в `.fnt` указан неверный путь к атласу | пересоберите шрифты конвейером |
 | Тексты «плывут» в меню | стиль переопределён после `theme.rpy` | поднимите `init offset` в `theme.rpy` |
 | Нет музыки | не установлен ffmpeg и треки остались `.wav` | это нормально, `mus()` найдёт `.wav` |
-| `audio/music/*.ogg is not loadable` в lint | музыка не синтезирована | запустите сборку без `--skip-music` |
-| Ассеты «всё серые» после правок `art.py` | забыли `add_grain` вместо `alpha_composite` | см. историю в `docs/CHANGELOG.md` |
+| `audio/music/*.ogg is not loadable` в lint | музыка не синтезирована | `--music-only` или полная сборка |
+| Латиница DOOM-шрифта слипается | `STCFN` — это 8×7 пикселей | не увеличивайте больше 2–3×, для текста используйте cyr-шрифты |
 
 ## Заметки для разработчика
 

@@ -1,6 +1,6 @@
 {
   "tool_version": "1.0.0",
-  "generated_at": "2026-11-11T22:30:49Z",
+  "generated_at": "2026-11-11T22:36:13Z",
   "iwad": {
     "file": "doom2.wad",
     "magic": "IWAD",
@@ -403,5 +403,5 @@
     "sounds": 14,
     "music": 8
   },
-  "elapsed_seconds": 110.3
+  "elapsed_seconds": 109.8
 }

@@ -498,11 +498,11 @@ def build(args: argparse.Namespace) -> int:
     write_png(plate(wad, METAL, (560, 56), brightness=0.40, rivets=False), gui / "notify.png")
     write_png(plate(wad, CHROME, (1280, 640), brightness=0.30, shade=0.6), gui / "nvl.png")
 
-    write_png(plate(wad, METAL, (300, 34), brightness=0.30, rivets=False, seed=5), gui / "button" / "idle_background.png")
-    write_png(plate(wad, METAL, (300, 34), brightness=0.55, rivets=False, seed=6, red=True), gui / "button" / "hover_background.png")
-    write_png(plate(wad, METAL, (300, 34), brightness=0.44, rivets=False, seed=7), gui / "button" / "selected_idle_background.png")
-    write_png(plate(wad, METAL, (300, 34), brightness=0.66, rivets=False, seed=8, red=True), gui / "button" / "selected_hover_background.png")
-    write_png(plate(wad, METAL, (300, 34), brightness=0.18, rivets=False, seed=9), gui / "button" / "insensitive_background.png")
+    write_png(plate(wad, METAL, (300, 34), brightness=0.42, rivets=False, seed=5), gui / "button" / "idle_background.png")
+    write_png(plate(wad, METAL, (300, 34), brightness=0.66, rivets=False, seed=6, red=True), gui / "button" / "hover_background.png")
+    write_png(plate(wad, METAL, (300, 34), brightness=0.55, rivets=False, seed=7), gui / "button" / "selected_idle_background.png")
+    write_png(plate(wad, METAL, (300, 34), brightness=0.75, rivets=False, seed=8, red=True), gui / "button" / "selected_hover_background.png")
+    write_png(plate(wad, METAL, (300, 34), brightness=0.24, rivets=False, seed=9), gui / "button" / "insensitive_background.png")
     write_png(plate(wad, METAL, (276, 206), brightness=0.34, seed=10), gui / "button" / "slot_idle_background.png")
     write_png(plate(wad, METAL, (276, 206), brightness=0.5, seed=11, red=True), gui / "button" / "slot_hover_background.png")
 

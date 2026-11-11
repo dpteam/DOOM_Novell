@@ -397,9 +397,10 @@ style stat_key:
     color "#a08b78"
 
 style stamp:
-    font "fonts/doom1.fnt"
-    size 14
+    font "fonts/cyr20.fnt"
+    size 20
     color "#8d7a66"
+    kerning 1
 
 
 ## Transforms #################################################################
