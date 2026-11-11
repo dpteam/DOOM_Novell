@@ -1,0 +1,44 @@
+{
+  "doom1": {
+    "file": "fonts/doom1.fnt",
+    "size": 14,
+    "line_height": 18,
+    "base": 16
+  },
+  "doom2": {
+    "file": "fonts/doom2.fnt",
+    "size": 21,
+    "line_height": 27,
+    "base": 24
+  },
+  "doom3": {
+    "file": "fonts/doom3.fnt",
+    "size": 28,
+    "line_height": 36,
+    "base": 32
+  },
+  "cyr20": {
+    "file": "fonts/cyr20.fnt",
+    "size": 20,
+    "line_height": 25,
+    "base": 19
+  },
+  "cyr26": {
+    "file": "fonts/cyr26.fnt",
+    "size": 26,
+    "line_height": 34,
+    "base": 25
+  },
+  "cyr32": {
+    "file": "fonts/cyr32.fnt",
+    "size": 32,
+    "line_height": 40,
+    "base": 30
+  },
+  "cyr44": {
+    "file": "fonts/cyr44.fnt",
+    "size": 44,
+    "line_height": 55,
+    "base": 41
+  }
+}

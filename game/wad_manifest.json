@@ -1,0 +1,407 @@
+{
+  "tool_version": "1.0.0",
+  "generated_at": "2026-11-11T22:30:49Z",
+  "iwad": {
+    "file": "doom2.wad",
+    "magic": "IWAD",
+    "lumps": 2919,
+    "sha256": "10d67824b11025ddd9198e8cfc87ca335ee6e2d3e63af4180fa9b8a471893255"
+  },
+  "art": {
+    "char_boris": {
+      "sprite": "POSS",
+      "moods": 5
+    },
+    "char_imp": {
+      "sprite": "TROO",
+      "moods": 5
+    },
+    "char_caco": {
+      "sprite": "HEAD",
+      "moods": 5
+    },
+    "char_baron": {
+      "sprite": "BOSS",
+      "moods": 5
+    },
+    "char_revenant": {
+      "sprite": "SKEL",
+      "moods": 5
+    },
+    "char_archvile": {
+      "sprite": "VILE",
+      "moods": 5
+    },
+    "char_cyber": {
+      "sprite": "CYBR",
+      "moods": 5
+    },
+    "char_lost": {
+      "sprite": "SKUL",
+      "moods": 5
+    },
+    "char_pain": {
+      "sprite": "PAIN",
+      "moods": 5
+    },
+    "char_mancubus": {
+      "sprite": "FATT",
+      "moods": 5
+    },
+    "char_arachno": {
+      "sprite": "BSPI",
+      "moods": 5
+    },
+    "char_spider": {
+      "sprite": "SPID",
+      "moods": 5
+    },
+    "char_chaingunner": {
+      "sprite": "CPOS",
+      "moods": 5
+    },
+    "char_shotgunner": {
+      "sprite": "SPOS",
+      "moods": 5
+    },
+    "char_demon": {
+      "sprite": "SARG",
+      "moods": 5
+    },
+    "bg_landing": {
+      "wall": "STARTAN3",
+      "floor": "FLOOR4_8",
+      "door": "BIGDOOR1"
+    },
+    "bg_office": {
+      "wall": "STARTAN2",
+      "floor": "FLOOR0_1",
+      "door": "DOOR1"
+    },
+    "bg_corridor": {
+      "wall": "STARTAN3",
+      "floor": "FLOOR4_6",
+      "door": "BIGDOOR4"
+    },
+    "bg_server": {
+      "wall": "COMPSTA1",
+      "floor": "FLOOR1_1",
+      "door": "BIGDOOR6"
+    },
+    "bg_canteen": {
+      "wall": "BROWNGRN",
+      "floor": "FLOOR5_4",
+      "door": "BIGDOOR2"
+    },
+    "bg_hellgate": {
+      "wall": "MARBLE1",
+      "floor": "FLOOR7_2",
+      "door": "BIGDOOR7"
+    },
+    "bg_hellhall": {
+      "wall": "MARBLE3",
+      "floor": "FLAT22",
+      "door": "BIGDOOR5"
+    },
+    "bg_temple": {
+      "wall": "WOOD1",
+      "floor": "FLOOR6_2",
+      "door": "DOORRED"
+    },
+    "bg_throne": {
+      "wall": "GSTONE2",
+      "floor": "FLAT20",
+      "door": "BIGDOOR3"
+    },
+    "bg_void": {
+      "wall": "BLODRIP1",
+      "floor": "FLOOR7_1",
+      "door": "DOORRED2"
+    },
+    "bg_vault": {
+      "wall": "METAL2",
+      "floor": "FLOOR0_3",
+      "door": "BIGDOOR1"
+    },
+    "icon": "icon.ico"
+  },
+  "audio": {
+    "sfx_click": "DSPISTOL",
+    "sfx_shotgun": "DSSHOTGN",
+    "sfx_squish": "DSSLOP",
+    "sfx_door": "DSDOROPN",
+    "sfx_boom": "DSBAREXP",
+    "sfx_pain": "DSPODTH1",
+    "sfx_player_pain": "DSPLPAIN",
+    "sfx_item": "DSITEMUP",
+    "sfx_weapon_up": "DSWPNUP",
+    "sfx_switch": "DSSWTCHN",
+    "sfx_secret": "DSMANSIT",
+    "sfx_teleport": "DSTELEPT",
+    "sfx_fire": "DSFLAME",
+    "sfx_skeleton": "DSSKESIT",
+    "music_title": {
+      "lump": "D_DM2TTL",
+      "file": "title.ogg",
+      "notes": 184,
+      "seconds": 10.3
+    },
+    "music_map": {
+      "lump": "D_RUNNIN",
+      "file": "map.ogg",
+      "notes": 4939,
+      "seconds": 232.2
+    },
+    "music_office": {
+      "lump": "D_SHAWN",
+      "file": "office.ogg",
+      "notes": 4266,
+      "seconds": 259.5
+    },
+    "music_chase": {
+      "lump": "D_DOOM",
+      "file": "chase.ogg",
+      "notes": 2704,
+      "seconds": 261.0
+    },
+    "music_hell": {
+      "lump": "D_THE_DA",
+      "file": "hell.ogg",
+      "notes": 3297,
+      "seconds": 300.0
+    },
+    "music_boss": {
+      "lump": "D_OPENIN",
+      "file": "boss.ogg",
+      "notes": 1565,
+      "seconds": 281.8
+    },
+    "music_ending": {
+      "lump": "D_READ_M",
+      "file": "ending.ogg",
+      "notes": 5573,
+      "seconds": 289.8
+    },
+    "music_menu": {
+      "lump": "D_DM2INT",
+      "file": "menu.ogg",
+      "notes": 3243,
+      "seconds": 174.2
+    }
+  },
+  "fonts": {
+    "ttf_source": "DejaVuSans.ttf",
+    "doom1": {
+      "file": "fonts/doom1.fnt",
+      "size": 14,
+      "line_height": 18,
+      "base": 16
+    },
+    "doom2": {
+      "file": "fonts/doom2.fnt",
+      "size": 21,
+      "line_height": 27,
+      "base": 24
+    },
+    "doom3": {
+      "file": "fonts/doom3.fnt",
+      "size": 28,
+      "line_height": 36,
+      "base": 32
+    },
+    "cyr20": {
+      "file": "fonts/cyr20.fnt",
+      "size": 20,
+      "line_height": 25,
+      "base": 19
+    },
+    "cyr26": {
+      "file": "fonts/cyr26.fnt",
+      "size": 26,
+      "line_height": 34,
+      "base": 25
+    },
+    "cyr32": {
+      "file": "fonts/cyr32.fnt",
+      "size": 32,
+      "line_height": 40,
+      "base": 30
+    },
+    "cyr44": {
+      "file": "fonts/cyr44.fnt",
+      "size": 44,
+      "line_height": 55,
+      "base": 41
+    }
+  },
+  "maps": [
+    {
+      "name": "MAP01",
+      "sectors": 59,
+      "things": 69
+    },
+    {
+      "name": "MAP02",
+      "sectors": 97,
+      "things": 173
+    },
+    {
+      "name": "MAP03",
+      "sectors": 121,
+      "things": 148
+    },
+    {
+      "name": "MAP04",
+      "sectors": 122,
+      "things": 138
+    },
+    {
+      "name": "MAP05",
+      "sectors": 176,
+      "things": 217
+    },
+    {
+      "name": "MAP06",
+      "sectors": 183,
+      "things": 247
+    },
+    {
+      "name": "MAP07",
+      "sectors": 29,
+      "things": 98
+    },
+    {
+      "name": "MAP08",
+      "sectors": 127,
+      "things": 242
+    },
+    {
+      "name": "MAP09",
+      "sectors": 131,
+      "things": 392
+    },
+    {
+      "name": "MAP10",
+      "sectors": 186,
+      "things": 509
+    },
+    {
+      "name": "MAP11",
+      "sectors": 143,
+      "things": 238
+    },
+    {
+      "name": "MAP12",
+      "sectors": 162,
+      "things": 195
+    },
+    {
+      "name": "MAP13",
+      "sectors": 247,
+      "things": 312
+    },
+    {
+      "name": "MAP14",
+      "sectors": 348,
+      "things": 173
+    },
+    {
+      "name": "MAP15",
+      "sectors": 301,
+      "things": 376
+    },
+    {
+      "name": "MAP16",
+      "sectors": 142,
+      "things": 249
+    },
+    {
+      "name": "MAP17",
+      "sectors": 274,
+      "things": 421
+    },
+    {
+      "name": "MAP18",
+      "sectors": 108,
+      "things": 498
+    },
+    {
+      "name": "MAP19",
+      "sectors": 251,
+      "things": 437
+    },
+    {
+      "name": "MAP20",
+      "sectors": 191,
+      "things": 256
+    },
+    {
+      "name": "MAP21",
+      "sectors": 61,
+      "things": 217
+    },
+    {
+      "name": "MAP22",
+      "sectors": 140,
+      "things": 121
+    },
+    {
+      "name": "MAP23",
+      "sectors": 69,
+      "things": 431
+    },
+    {
+      "name": "MAP24",
+      "sectors": 181,
+      "things": 364
+    },
+    {
+      "name": "MAP25",
+      "sectors": 147,
+      "things": 276
+    },
+    {
+      "name": "MAP26",
+      "sectors": 126,
+      "things": 296
+    },
+    {
+      "name": "MAP27",
+      "sectors": 187,
+      "things": 490
+    },
+    {
+      "name": "MAP28",
+      "sectors": 116,
+      "things": 266
+    },
+    {
+      "name": "MAP29",
+      "sectors": 205,
+      "things": 276
+    },
+    {
+      "name": "MAP30",
+      "sectors": 22,
+      "things": 95
+    },
+    {
+      "name": "MAP31",
+      "sectors": 80,
+      "things": 317
+    },
+    {
+      "name": "MAP32",
+      "sectors": 20,
+      "things": 111
+    }
+  ],
+  "counts": {
+    "characters": 15,
+    "scenes": 11,
+    "maps": 32,
+    "sounds": 14,
+    "music": 8
+  },
+  "elapsed_seconds": 110.3
+}
