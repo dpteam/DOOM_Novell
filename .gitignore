@@ -1,0 +1,47 @@
+# --- Ren'Py runtime junk -----------------------------------------------------
+game/saves/
+game/cache/
+game/*.rpyc
+game/story/*.rpyc
+game/gui/*.rpyc
+*.rpyc
+*.rpymc
+log.txt
+traceback.txt
+errors.txt
+saves/
+*-shaders.txt
+game/tl/**/*.rpyc
+
+# --- WADs are never committed ------------------------------------------------
+# The pipeline reads them, it does not ship them.
+*.wad
+*.WAD
+*.pk3
+*.pk7
+*.lmp
+
+# --- Python tooling ----------------------------------------------------------
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+preview/
+temp/
+*.tmp
+
+# --- Build output ------------------------------------------------------------
+dist/
+build/
+*-dists/
+DOOM_Novell-*/
+game/icon.ico.orig
+
+# --- Editors / OS ------------------------------------------------------------
+.vscode/
+.idea/
+Thumbs.db
+Desktop.ini
+.DS_Store
+*.bak
+*.bak.*

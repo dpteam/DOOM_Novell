@@ -1,0 +1,53 @@
+MIT License
+
+Copyright (c) 2026 DOOM_Novell contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+================================================================================
+ASSETS NOTICE - READ THIS BEFORE PUBLISHING A BUILD
+================================================================================
+
+The MIT license above covers the source code in this repository: the Ren'Py
+script files, the Python asset pipeline under tools/, and the documentation.
+
+It does NOT cover the generated art and audio in game/images, game/gui,
+game/audio and game/fonts, because those files are rendered from the graphics
+and sounds inside DOOM2.WAD. DOOM, DOOM II, the DOOM logo, the monster and
+weapon sprites, the textures, the STCFN font and the MUS soundtrack are
+copyright (c) id Software LLC, a ZeniMax Media company, and remain the
+property of their owners.
+
+This project is a non-commercial fan work. It is intended for personal,
+local use, exactly like a source port that asks you to supply your own IWAD.
+
+If you intend to redistribute a build, regenerate the assets from an IWAD
+that is freely redistributable - FreeDoom is the sane choice:
+
+    python tools/build_assets.py --iwad freedoom2.wad --out .
+
+FreeDoom is distributed under a BSD-style license and its assets can be
+redistributed with attribution. See docs/ASSETS.md for the full breakdown.
+
+The Cyrillic bitmap fonts are rasterisations of glyphs from DejaVu Sans
+(Bitstream Vera license, free to modify and redistribute); only the rasterised
+bitmaps are shipped, and they are generated, not copied from the IWAD.
+
+Ren'Py itself is (c) Tom Rothamel and contributors, licensed under the MIT
+license; it is not bundled in this repository.

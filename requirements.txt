@@ -1,0 +1,9 @@
+# Tooling dependencies for the asset pipeline.
+#
+#   python -m pip install -r requirements.txt
+#
+# The game itself needs none of these: it only needs Ren'Py 8.2+ and the
+# assets already committed under game/.
+
+Pillow>=10.0
+numpy>=1.24
