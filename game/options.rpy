@@ -113,8 +113,23 @@ init python:
     build.classify("**/#**", None)
     build.classify("**/thumbs.db", None)
     build.classify("**/*.psd", None)
+
+    ## Never ship the IWAD, or anything CI downloaded or produced around it.
+    ## `*.wad` and `**/*.wad` are both needed: the first matches files in the
+    ## project root, the second matches nested ones.
+    build.classify("*.wad", None)
+    build.classify("*.WAD", None)
     build.classify("**/*.wad", None)
     build.classify("**/*.WAD", None)
+    build.classify("freedoom*", None)
+
+    ## Build and CI leftovers that live in the project root.
+    build.classify("dist/**", None)
+    build.classify("*.log", None)
+    build.classify("**/*.log", None)
+    build.classify("requirements.txt", None)
+    build.classify("icon.png", None)
+
     build.classify("tools/**", None)
     build.classify("docs/**", "documentation")
     build.classify("refs/**", None)
