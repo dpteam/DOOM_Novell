@@ -583,6 +583,13 @@ screen about():
             if gui.about:
                 text "[gui.about!t]\n"
 
+            ## Which IWAD this particular build came from (see options.rpy).
+            ## No `size` here: about_text uses a bitmap font with exactly one
+            ## usable size, and any other size is a hard crash in Ren'Py 8.5.
+            $ _prov = build_provenance()
+            if _prov:
+                text "[_prov]\n" color "#8d7a66"
+
             text _("Made with {a=https://www.renpy.org/}Ren'Py{/a} [renpy.version_only].\n\n[renpy.license!t]")
 
 

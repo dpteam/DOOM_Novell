@@ -37,7 +37,7 @@ define config.has_sound = True
 define config.has_music = True
 define config.has_voice = False
 
-init python:
+init 10 python:
 
     ## Point the main menu at whichever music format the build produced.
     for _ext in (".ogg", ".wav"):
@@ -45,6 +45,28 @@ init python:
         if renpy.loadable(_candidate):
             config.main_menu_music = _candidate
             break
+
+    def build_provenance():
+        """Which IWAD this build was assembled from, straight from the manifest.
+
+        Computed on demand rather than at init time: the about screen is the
+        only consumer, and doing it lazily avoids any dependency on init order
+        (gui.about is a `define`, which runs after this block).
+        """
+        try:
+            import json
+
+            with renpy.open_file("wad_manifest.json") as f:
+                iwad = json.loads(f.read().decode("utf-8")).get("iwad", {})
+            if not iwad.get("file"):
+                return ""
+            return "Ресурсы собраны из {name}: {lumps} lump, SHA-256 {sha}…".format(
+                name=iwad["file"],
+                lumps=iwad.get("lumps", "?"),
+                sha=(iwad.get("sha256") or "?")[:16],
+            )
+        except Exception:
+            return ""
 
 
 ## Transitions #################################################################

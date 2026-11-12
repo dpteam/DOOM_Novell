@@ -104,11 +104,19 @@ tools/
   build_assets.py       конвейер: IWAD → game/
   wadlib/               чтение WAD, звук, уровни, композит, шрифты
   gen_images_rpy.py     генерирует game/images.rpy
+  verify_assets.py      сверяет шрифты/изображения/манифест (гоняется в CI)
+  selftest_wadlib.py    самотест декодеров на синтетическом WAD
+  make_freedoom_build.py  проект + FreeDoom-ассеты → проверенная сборка
+.github/
+  workflows/ci.yml      lint, smoke-тест, FreeDoom-сборка, дистрибутивы
+  workflows/release.yml релиз по тегу, из FreeDoom
+  actions/setup-renpy/  установка SDK с кэшем
 docs/
   ASSETS.md             полная карта «lump → ассет»
   ARCHITECTURE.md       устройство конвейера и игры
   STORY.md              сценарий и концовки (спойлеры)
   BUILD.md              сборка, упаковка, типичные проблемы
+  CI.md                 что делает CI и как выпустить релиз
 ```
 
 ## Документация
@@ -125,8 +133,20 @@ docs/
 
 Теги собираются автоматически и публикуются в
 [Releases](https://github.com/dpteam/DOOM_Novell/releases): Windows (zip),
-Linux (tar.bz2) и macOS (zip). Каждый коммит в `main` дополнительно оставляет
-win/linux/mac-архивы в артефактах CI на 14 дней.
+Linux (tar.bz2) и macOS (zip).
+
+**В релизах — сборка из FreeDoom.** Ассеты в репозитории извлечены из
+DOOM2.WAD и принадлежат id Software, поэтому их нельзя распространять.
+Release-workflow скачивает `freedoom2.wad`, пересобирает из него все ресурсы
+и только потом упаковывает игру. Выглядит иначе, чем версия из DOOM2, зато
+её можно публиковать.
+
+Хотите ровно ту картинку, что на скриншотах? Соберите сами — это личное
+использование:
+
+```bash
+python tools/build_assets.py --iwad DOOM2.WAD --out .
+```
 
 Релиз выпускается одним тегом:
 
