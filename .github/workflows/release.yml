@@ -1,0 +1,111 @@
+name: Release
+
+# Tag the repository (git tag v1.1.0 && git push --tags) and this builds the
+# packaged game, checks the tag against config.version, and publishes a GitHub
+# release with the archives attached.
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing tag to publish
+        required: true
+
+permissions:
+  contents: write
+
+env:
+  RENPY_VERSION: "8.5.3"
+
+jobs:
+  release:
+    name: Publish ${{ github.ref_name }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: ./.github/actions/setup-renpy
+        with:
+          version: ${{ env.RENPY_VERSION }}
+
+      - name: Check the tag against config.version
+        run: |
+          python - <<'PY'
+          import os, re, sys
+          from pathlib import Path
+
+          tag = os.environ.get("TAG", "").lstrip("v")
+          text = Path("game/options.rpy").read_text(encoding="utf-8")
+          match = re.search(r'define config\.version = "([^"]+)"', text)
+          if not match:
+              sys.exit("could not find config.version in game/options.rpy")
+          version = match.group(1)
+          print(f"tag={tag!r} config.version={version!r}")
+          if tag != version:
+              sys.exit(f"tag {tag!r} does not match config.version {version!r}")
+          PY
+        env:
+          TAG: ${{ github.ref_name }}
+
+      - name: Build every package
+        run: |
+          set -o pipefail
+          "$RENPY_SH" "$RENPY_SDK/launcher" distribute . \
+            --destination dist \
+            --no-update \
+            --package win \
+            --package linux \
+            --package mac \
+            2>&1 | tee build.log
+
+      - name: Write the release notes
+        env:
+          TAG: ${{ github.ref_name }}
+          SHA: ${{ github.sha }}
+        run: |
+          cat > notes.md <<EOF
+          Сборка DOOM: Испытательный срок ${TAG} из коммита ${SHA}.
+
+          **Установка.** Распакуйте архив и запустите \`DOOM_Novell\`
+          (\`DOOM_Novell.sh\` на Linux, \`DOOM_Novell.app\` на macOS).
+
+          **macOS.** Приложение не подписано; снимите карантин:
+          \`xattr -cr DOOM_Novell.app\`
+
+          **Лицензии.** Код и скрипты — MIT. Графика и звук — id Software /
+          ZeniMax, фанатская некоммерческая переработка. Для распространения
+          пересоберите ассеты из FreeDoom (\`docs/ASSETS.md\`).
+
+          **Проверено в CI:** lint, self-тест декодеров WAD, сквозной
+          smoke-тест от главного меню до титров.
+          EOF
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          files=(dist/*)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "::error::distribute produced no packages"
+            exit 1
+          fi
+          ls -lh dist
+
+          # Re-running on an existing tag should update the assets, not fail.
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "${files[@]}" --clobber
+            gh release edit "$TAG" --notes-file notes.md
+          else
+            gh release create "$TAG" "${files[@]}" \
+              --title "DOOM: Испытательный срок $TAG" \
+              --notes-file notes.md
+          fi

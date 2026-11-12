@@ -1,5 +1,9 @@
 # DOOM: Испытательный срок
 
+[![CI](https://github.com/dpteam/DOOM_Novell/actions/workflows/ci.yml/badge.svg)](https://github.com/dpteam/DOOM_Novell/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/dpteam/DOOM_Novell?label=release)](https://github.com/dpteam/DOOM_Novell/releases)
+[![License: MIT](https://img.shields.io/badge/code-MIT-blue.svg)](LICENSE)
+
 > «Ад — это не место. Это график.»
 
 Фанатская **визуальная новелла** на Ren'Py в декорациях DOOM II: корпоративная
@@ -113,8 +117,23 @@ docs/
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — как устроен конвейер и игра.
 - [`docs/STORY.md`](docs/STORY.md) — главы, флаги и все концовки.
 - [`docs/BUILD.md`](docs/BUILD.md) — запуск, упаковка, пересборка, траблшутинг.
+- [`docs/CI.md`](docs/CI.md) — что делает GitHub Actions и как выпустить релиз.
 - [`docs/CHANGELOG.md`](docs/CHANGELOG.md) — история решений (включая пару
   поучительных багов).
+
+## Готовые сборки
+
+Теги собираются автоматически и публикуются в
+[Releases](https://github.com/dpteam/DOOM_Novell/releases): Windows (zip),
+Linux (tar.bz2) и macOS (zip). Каждый коммит в `main` дополнительно оставляет
+win/linux/mac-архивы в артефактах CI на 14 дней.
+
+Релиз выпускается одним тегом:
+
+```bash
+git tag v1.1.0
+git push origin v1.1.0
+```
 
 ## Лицензии
 

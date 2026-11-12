@@ -1,0 +1,51 @@
+name: Set up Ren'Py
+description: >
+  Downloads and caches the Ren'Py SDK, then exports RENPY_SH (the renpy.sh
+  launcher) and RENPY_SDK (the SDK root) for later steps.
+
+inputs:
+  version:
+    description: Ren'Py SDK version, for example 8.5.3
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Restore the SDK from cache
+      id: cache
+      uses: actions/cache@v4
+      with:
+        path: ~/renpy-sdk
+        key: renpy-sdk-${{ runner.os }}-${{ inputs.version }}
+
+    - name: Download the SDK
+      shell: bash
+      run: |
+        set -euo pipefail
+        mkdir -p "$HOME/renpy-sdk"
+
+        marker="$HOME/renpy-sdk/.ready-${{ inputs.version }}"
+        if [ ! -f "$marker" ]; then
+          url="https://www.renpy.org/dl/${{ inputs.version }}/renpy-${{ inputs.version }}-sdk.tar.bz2"
+          echo "Downloading $url"
+          curl -fsSL --retry 3 --retry-delay 2 -o "$RUNNER_TEMP/sdk.tar.bz2" "$url"
+          tar -xjf "$RUNNER_TEMP/sdk.tar.bz2" -C "$HOME/renpy-sdk"
+          rm -f "$RUNNER_TEMP/sdk.tar.bz2"
+          touch "$marker"
+        else
+          echo "SDK ${{ inputs.version }} restored from cache"
+        fi
+
+        # The tarball's top-level directory name has changed between releases,
+        # so locate the launcher instead of assuming a path.
+        sh=$(find "$HOME/renpy-sdk" -maxdepth 2 -name renpy.sh -type f | head -n 1)
+        if [ -z "$sh" ]; then
+          echo "::error::renpy.sh not found after extracting the SDK"
+          exit 1
+        fi
+        chmod +x "$sh"
+
+        echo "RENPY_SH=$sh" >> "$GITHUB_ENV"
+        echo "RENPY_SDK=$(dirname "$sh")" >> "$GITHUB_ENV"
+        echo "Using $sh"
+        "$sh" --version
