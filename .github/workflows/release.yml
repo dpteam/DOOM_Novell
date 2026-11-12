@@ -16,7 +16,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Existing tag to publish
+        description: Existing tag to publish (for example v1.0.0)
         required: true
 
 permissions:
@@ -28,10 +28,18 @@ env:
 
 jobs:
   release:
-    name: Publish ${{ github.ref_name }}
+    name: Publish ${{ inputs.tag || github.ref_name }}
     runs-on: ubuntu-latest
+
+    # `github.ref_name` is the tag on a tag push, but the branch on a manual
+    # run, so an explicit input wins when present.
+    env:
+      TAG: ${{ inputs.tag || github.ref_name }}
+
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref_name }}
 
       - uses: actions/setup-python@v5
         with:
@@ -52,7 +60,7 @@ jobs:
           import os, re, sys
           from pathlib import Path
 
-          tag = os.environ.get("TAG", "").lstrip("v")
+          tag = os.environ["TAG"].strip().lstrip("v")
           text = Path("game/options.rpy").read_text(encoding="utf-8")
           match = re.search(r'define config\.version = "([^"]+)"', text)
           if not match:
@@ -62,8 +70,6 @@ jobs:
           if tag != version:
               sys.exit(f"tag {tag!r} does not match config.version {version!r}")
           PY
-        env:
-          TAG: ${{ github.ref_name }}
 
       - name: Fetch FreeDoom
         run: |
@@ -81,9 +87,30 @@ jobs:
 
       - name: Rebuild the assets from FreeDoom
         run: |
-          python tools/build_assets.py --iwad freedoom2.wad --out . 
+          python tools/build_assets.py --iwad freedoom2.wad --out .
           python tools/gen_images_rpy.py
           python tools/verify_assets.py
+
+      - name: Confirm the build does not contain retail assets
+        run: |
+          set -euo pipefail
+          # game/wad_manifest.json is what got packaged (it ends up inside
+          # game/archive.rpa), so check the copy that was just used to build and
+          # also ship a readable copy next to the archives.
+          python - <<'PY'
+          import json, shutil, sys
+          from pathlib import Path
+
+          manifest = json.loads(Path("game/wad_manifest.json").read_text(encoding="utf-8"))
+          iwad = manifest["iwad"]["file"].lower()
+          print("build IWAD:", iwad)
+          if "freedoom" not in iwad:
+              sys.exit(f"refusing to publish a build made from {iwad}")
+
+          Path("dist").mkdir(exist_ok=True)
+          shutil.copy2("game/wad_manifest.json", "dist/wad_manifest.json")
+          print("copied the manifest to dist/ for inspection")
+          PY
 
       - name: Lint the FreeDoom build
         env:
@@ -105,36 +132,16 @@ jobs:
             --package mac \
             2>&1 | tee build.log
 
-      - name: Confirm the build no longer contains retail assets
+      - name: List the result
         run: |
           set -euo pipefail
-          # The manifest records the IWAD a build came from; make sure the
-          # packaged game says FreeDoom and not DOOM2.
-          python - <<'PY'
-          import glob, json, sys, zipfile
-
-          for path in sorted(glob.glob("dist/*.zip")):
-              with zipfile.ZipFile(path) as z:
-                  names = [n for n in z.namelist() if n.endswith("wad_manifest.json")]
-                  if not names:
-                      continue
-                  manifest = json.loads(z.read(names[0]).decode("utf-8"))
-                  iwad = manifest["iwad"]["file"].lower()
-                  print(f"{path}: packaged IWAD = {iwad}")
-                  if "freedoom" not in iwad:
-                      sys.exit(f"refusing to publish a build made from {iwad}")
-                  break
-          else:
-              sys.exit("no package contained game/wad_manifest.json")
-          PY
+          ls -lh dist
+          test -n "$(ls dist/*.zip dist/*.tar.bz2 2>/dev/null)"
 
       - name: Write the release notes
-        env:
-          TAG: ${{ github.ref_name }}
-          SHA: ${{ github.sha }}
         run: |
           cat > notes.md <<EOF
-          Сборка DOOM: Испытательный срок ${TAG} из коммита ${SHA}.
+          Сборка DOOM: Испытательный срок ${TAG} из коммита ${GITHUB_SHA}.
 
           **Эта сборка сделана из FreeDoom.** Все спрайты, текстуры, звуки и
           музыка взяты из \`freedoom2.wad\` (лицензия BSD) и пересобраны
@@ -151,6 +158,9 @@ jobs:
           \`python tools/build_assets.py --iwad DOOM2.WAD --out .\` — это
           остаётся личным использованием.
 
+          **Что внутри.** \`wad_manifest.json\` рядом с архивами фиксирует,
+          из какого именно IWAD собран билд.
+
           **Лицензии.** Код и скрипты — MIT. Графика и звук в этом релизе —
           FreeDoom (BSD). Подробности в \`docs/ASSETS.md\`.
 
@@ -162,7 +172,6 @@ jobs:
       - name: Publish the release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG: ${{ github.ref_name }}
         run: |
           set -euo pipefail
           shopt -s nullglob
