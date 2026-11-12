@@ -24,6 +24,12 @@ define guard = Character("ОХРАННИК", color="#9aa0ea")
 define dog = Character("ПЁС", color="#c08080")
 define compsys = Character("СИСТЕМА UAC", color="#8ad8e0", what_prefix="> ", what_suffix="")
 
+## Centred card text.  Each kind of line has its own bitmap font, because a
+## bitmap font cannot be drawn at an arbitrary size (see theme.rpy).
+define card_title = Character(None, kind=centered, what_style="card_title_text")
+define card_sub = Character(None, kind=centered, what_style="card_sub_text")
+define card_body = Character(None, kind=centered, what_style="card_body_text")
+
 ## ---------------------------------------------------------------- state
 
 default hp = 100

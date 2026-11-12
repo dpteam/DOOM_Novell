@@ -355,14 +355,15 @@ label credits:
     scene black
     with Fade(0.8, 0.5, 0.8)
 
-    centered "{size=44}{color=#d8452a}DOOM{/color}{/size}\n{size=24}ИСПЫТАТЕЛЬНЫЙ СРОК{/size}"
+    card_title "DOOM"
+    card_sub "ИСПЫТАТЕЛЬНЫЙ СРОК"
 
-    centered "Ресурсы: DOOM2.WAD\nПалитра, текстуры, спрайты, флэты, шрифт STCFN, звуки DMX, музыка MUS, геометрия уровней."
+    card_body "Ресурсы: DOOM2.WAD\nПалитра, текстуры, спрайты, флэты, шрифт STCFN, звуки DMX, музыка MUS, геометрия уровней."
 
-    centered "Сборка ассетов:\ntools/build_assets.py"
+    card_body "Сборка ассетов:\ntools/build_assets.py"
 
-    centered "Движок: Ren'Py 8.2\nКод и скрипты: MIT\nГрафика и звук: id Software / ZeniMax, фанатская переработка"
+    card_body "Движок: Ren'Py 8.5\nКод и скрипты: MIT\nГрафика и звук: id Software / ZeniMax, фанатская переработка"
 
-    centered "Спасибо, что дожили до титров.\nФорму 4-П можно заполнить на выходе."
+    card_body "Спасибо, что дожили до титров.\nФорму 4-П можно заполнить на выходе."
 
     $ renpy.full_restart()

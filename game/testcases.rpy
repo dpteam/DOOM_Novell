@@ -1,80 +1,95 @@
 ################################################################################
-## Automated smoke test.
+## Automated smoke test (Ren'Py 8.5 testcase syntax).
 ##
 ##   renpy.exe . test smoke
 ##
-## It walks the menus, then plays the game from the prologue to the BFG ending,
-## clicking through dialogue and picking options by caption.  Any missing image,
-## broken screen or unknown font stops it with a traceback, which is the point.
+## It walks every menu, then plays the whole game from the prologue to an
+## ending, picking options by their caption.  A missing image, a broken screen
+## or an unregistered font stops it with a traceback, which is the point.
+##
+## 8.5 changed this language: bare string literals are gone, use `click "..."`,
+## `advance`, and `advance until <condition>` (see renpy/test/testparser.py).
 ################################################################################
 
+testsuite global:
+    teardown:
+        exit
+
+
 testcase smoke:
+
+    $ _test.transition_timeout = 0.05
 
     pause 0.8
 
     ## --- archive ---------------------------------------------------------
-    "АРХИВ"
+    click "АРХИВ"
     pause 0.4
-    "БЕСТИАРИЙ"
+    click "БЕСТИАРИЙ"
     pause 0.3
-    "УРОВНИ"
+    click "УРОВНИ"
     pause 0.3
-    "КОНЦОВКИ"
+    click "КОНЦОВКИ"
     pause 0.3
-    "НАЗАД"
-    pause 0.4
-
-    ## --- about / prefs / help --------------------------------------------
-    "О ПРОЕКТЕ"
-    pause 0.3
-    "НАЗАД"
-    pause 0.3
-
-    "НАСТРОЙКИ"
-    pause 0.3
-    "НАЗАД"
-    pause 0.3
-
-    "УПРАВЛЕНИЕ"
-    pause 0.3
-    "НАЗАД"
+    click "НАЗАД"
     pause 0.4
 
-    ## --- start ------------------------------------------------------------
-    "УСТРОИТЬСЯ"
+    ## --- about / preferences / help --------------------------------------
+    click "О ПРОЕКТЕ"
+    pause 0.3
+    click "НАЗАД"
+    pause 0.3
+
+    click "НАСТРОЙКИ"
+    pause 0.3
+    click "НАЗАД"
+    pause 0.3
+
+    click "УПРАВЛЕНИЕ"
+    pause 0.3
+    click "НАЗАД"
+    pause 0.4
+
+    ## --- play ------------------------------------------------------------
+    click "УСТРОИТЬСЯ"
     pause 0.8
 
-    ## Prologue + chapter card.
-    click until "Ты опоздал на девять минут."
-    click until "Спросить про профсоюз."
-    "Спросить про профсоюз."
+    ## Chapter 1. `advance` also dismisses the chapter-card screen.
+    advance until screen "choice" timeout 120
+    click "Спросить про профсоюз."
 
     ## Chapter 2.
-    click until "Потушить огонь."
-    "Потушить огонь."
+    advance until screen "choice" timeout 120
+    click "Потушить огонь."
 
-    ## Chapter 3: take the chainsaw so the secret path exists.
-    click until "Снять со стены бензопилу."
-    "Снять со стены бензопилу."
+    ## Chapter 3: take the chainsaw, it unlocks the secret ending.
+    advance until screen "choice" timeout 120
+    click "Снять со стены бензопилу."
 
     ## Chapter 4: two choices.
-    click until "Извиниться перед ребёнком."
-    "Извиниться перед ребёнком."
-    click until "Спросить Арахну, что она думает."
-    "Спросить Арахну, что она думает."
+    advance until screen "choice" timeout 120
+    click "Извиниться перед ребёнком."
 
-    ## Chapter 5: dodge, then BFG.
-    click until "Уклониться и не провоцировать."
-    "Уклониться и не провоцировать."
-    click until "Достать BFG-9000."
-    "Достать BFG-9000."
+    advance until screen "choice" timeout 120
+    click "Спросить Арахну, что она думает."
 
-    ## Ending summary.
-    click until "ПРОДОЛЖИТЬ"
-    "ПРОДОЛЖИТЬ"
+    ## Chapter 5: dodge, then the BFG.
+    advance until screen "choice" timeout 120
+    click "Уклониться и не провоцировать."
 
-    ## Credits roll, the game returns to the main menu.
-    pause 3.0
-    click until "УСТРОИТЬСЯ"
+    advance until screen "choice" timeout 120
+    click "Достать BFG-9000."
 
-    run Quit(confirm=False)
+    ## Ending summary, then the credits (which restart the game).  `advance
+    ## until screen "main_menu"` is the real assertion here: it only succeeds
+    ## if the restart actually lands back on the main menu.
+    advance until screen "run_summary" timeout 120
+    click "ПРОДОЛЖИТЬ"
+
+    advance until screen "main_menu" timeout 90
+
+    ## And the menu still responds after a full restart.
+    click "АРХИВ"
+    pause 0.6
+    click "НАЗАД"
+    pause 0.4

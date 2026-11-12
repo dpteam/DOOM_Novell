@@ -198,7 +198,7 @@ screen archive_bestiary():
                             spacing 2
                             yalign 0.5
                             if entry["key"] in persistent.seen_bestiary:
-                                text entry["name"] style "gallery_title" size 26
+                                text entry["name"] style "gallery_title"
                                 text entry["role"] style "gallery_item" color "#ffb27a"
                                 text ("«" + entry["quote"] + "»") style "gallery_item" italic True
                             else:
@@ -218,16 +218,18 @@ screen archive_levels():
 
         vpgrid:
             cols 6
-            spacing 8
+            spacing 10
 
             for mapname in MAP_LIST:
                 vbox:
-                    spacing 2
+                    spacing 0
+                    xsize 176
                     imagebutton:
                         idle Transform("images/maps/%s.png" % mapname, zoom=0.20)
                         hover Transform("images/maps/%s.png" % mapname, zoom=0.21)
                         action Show("map_view", mapname=mapname)
-                    text mapname style "map_label" size 28 xalign 0.5
+                        xalign 0.5
+                    text mapname style "map_label" xalign 0.5 yoffset -4
 
 screen map_view(mapname):
 

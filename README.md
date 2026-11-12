@@ -26,7 +26,7 @@
 время. Сержанту нужно пройти пять этажей бюрократического ада, по пути
 разговаривая с эйчаром-какодемоном, коучем-архивилем и директором-кибердемоном.
 
-- **5 глав**, 373 реплики, ~3 200 слов.
+- **5 глав**, 375 реплик, ~3 200 слов.
 - **7 выборов**, которые считают фраги, милосердие и обещания.
 - **6 концовок**, включая секретную (бензопила).
 - **HUD** с HP, бронёй, патронами и счётчиком трупов.
@@ -48,10 +48,13 @@
 ## Быстрый старт
 
 ```bash
-# 1. Запустить (нужен Ren'Py 8.2+)
-renpy.exe "C:\path\to\DOOM_Novell"
+# 1. Установить движок (Windows, через Scoop)
+scoop install renpy
 
-# 2. Пересобрать ассеты из своего WAD
+# 2. Запустить
+renpy "C:\path\to\DOOM_Novell"
+
+# 3. Пересобрать ассеты из своего WAD
 python -m pip install -r requirements.txt
 python tools/build_assets.py --iwad DOOM2.WAD --out .
 python tools/gen_images_rpy.py
@@ -60,8 +63,11 @@ python tools/gen_images_rpy.py
 Проверка проекта:
 
 ```bash
-renpy.exe "C:\path\to\DOOM_Novell" lint
-# Lint report: 373 dialogue blocks, 148 images, 36 screens. Без ошибок.
+renpy "C:\path\to\DOOM_Novell" lint
+# 375 dialogue blocks, 148 images, 36 screens. Без ошибок.
+
+renpy "C:\path\to\DOOM_Novell" test smoke
+# Прогоняет меню и всю игру до концовки. Status: PASSED.
 ```
 
 Если игра запускается с чёрным экраном — в диалоге выбора рендерера выберите

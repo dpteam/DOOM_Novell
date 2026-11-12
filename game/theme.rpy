@@ -130,7 +130,9 @@ style button:
     activate_sound "audio/sfx/item.wav"
 
 style navigation_button:
-    xsize 300
+    ## 48 (navigation_xpos) + 232 = 280, the width of the navigation frame.
+    ## Anything wider bleeds under the content column of the game menus.
+    xsize 232
     ysize 34
 
 style navigation_button_text:
@@ -192,9 +194,15 @@ style game_menu_label_text:
     yalign 0.5
     outlines [ (2, "#2a0d06", 0, 0) ]
 
+## The return button lives in the bottom-left corner of every menu screen.
+## `ypos -40` here (without a yalign) pushes it off the top of the screen, so
+## keep the stock anchoring and only nudge it.
 style return_button:
-    xpos 0
-    ypos -40
+    xpos 48
+    yalign 1.0
+    yoffset -34
+    xsize 232
+    ysize 34
 
 style page_label_text:
     font "fonts/cyr20.fnt"
@@ -366,8 +374,8 @@ style chapter_sub:
     color "#c9b8a2"
 
 style map_label:
-    font "fonts/cyr32.fnt"
-    size 32
+    font "fonts/cyr20.fnt"
+    size 20
     color "#ffd6a8"
     outlines [ (2, "#000000", 0, 0) ]
 
@@ -401,6 +409,39 @@ style stamp:
     size 20
     color "#8d7a66"
     kerning 1
+
+
+## Centred card text ##########################################################
+##
+## Bitmap fonts have exactly one usable size, so a `{size=...}` tag inside a
+## line would ask Ren'Py for a (font, size) pair that does not exist - and
+## Ren'Py 8.5 answers that with a FreetypeError instead of a fallback.  These
+## styles give each size its own font instead, and the card characters below
+## (characters.rpy) pick the right one.
+
+style card_title_text is say_dialogue:
+    font "fonts/cyr44.fnt"
+    size 44
+    color "#d8452a"
+    xalign 0.5
+    text_align 0.5
+    outlines [ (3, "#200703", 0, 0) ]
+
+style card_sub_text is say_dialogue:
+    font "fonts/cyr26.fnt"
+    size 26
+    color "#f6e6cf"
+    xalign 0.5
+    text_align 0.5
+    line_spacing 6
+
+style card_body_text is say_dialogue:
+    font "fonts/cyr20.fnt"
+    size 20
+    color "#c9b8a2"
+    xalign 0.5
+    text_align 0.5
+    line_spacing 6
 
 
 ## Transforms #################################################################
