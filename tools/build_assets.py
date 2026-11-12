@@ -460,6 +460,12 @@ def build_music(wad: Wad, music_dir: Path, manifest: dict, previous: dict | None
     eight tracks and churn the repository.
     """
     use_ogg = ffmpeg_available()
+    if not use_ogg:
+        print(
+            "    ! ffmpeg not found: music will be written as uncompressed WAV,\n"
+            "      which makes the package roughly 300 MB larger. Install ffmpeg\n"
+            "      (Debian/Ubuntu: sudo apt-get install ffmpeg) for OGG output."
+        )
 
     ## Accept either a full manifest ({"audio": {...}}) or the audio mapping
     ## itself, so callers cannot get this wrong.
