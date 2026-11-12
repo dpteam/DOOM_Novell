@@ -124,6 +124,15 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
+      - name: Fail if no screenshots were captured
+        run: |
+          count=$(find tests/screenshots -name '*.png' 2>/dev/null | wc -l)
+          echo "captured $count screenshot(s)"
+          if [ "$count" -lt 5 ]; then
+            echo "::error::expected the smoke test to capture screenshots"
+            exit 1
+          fi
+
   # ---------------------------------------------------------------------------
   # Packaged builds.  The assets are committed, so this needs no IWAD - which
   # matters, because DOOM2.WAD must never reach CI.

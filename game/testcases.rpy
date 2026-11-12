@@ -19,16 +19,23 @@ testsuite global:
 testcase smoke:
 
     $ _test.transition_timeout = 0.05
+    ## Screenshots are evidence for the CI artifacts, not a golden-image test,
+    ## so never compare against a previous run.
+    $ _test.overwrite_screenshots = True
 
     pause 0.8
+    screenshot "01-main-menu.png"
 
     ## --- archive ---------------------------------------------------------
     click "АРХИВ"
-    pause 0.4
+    pause 0.5
+    screenshot "02-archive-endings.png"
     click "БЕСТИАРИЙ"
-    pause 0.3
+    pause 0.4
+    screenshot "03-archive-bestiary.png"
     click "УРОВНИ"
-    pause 0.3
+    pause 0.4
+    screenshot "04-archive-levels.png"
     click "КОНЦОВКИ"
     pause 0.3
     click "НАЗАД"
@@ -52,10 +59,16 @@ testcase smoke:
 
     ## --- play ------------------------------------------------------------
     click "УСТРОИТЬСЯ"
-    pause 0.8
 
-    ## Chapter 1. `advance` also dismisses the chapter-card screen.
+    ## Chapter 1. The prologue fades in, then the chapter card appears; capture
+    ## that card rather than a half-faded frame, then advance into the chapter.
+    advance until screen "chapter_card" timeout 120
+    pause 0.4
+    screenshot "05-chapter-card.png"
+
     advance until screen "choice" timeout 120
+    pause 0.3
+    screenshot "06-first-choice.png"
     click "Спросить про профсоюз."
 
     ## Chapter 2.
@@ -84,6 +97,8 @@ testcase smoke:
     ## until screen "main_menu"` is the real assertion here: it only succeeds
     ## if the restart actually lands back on the main menu.
     advance until screen "run_summary" timeout 120
+    pause 0.3
+    screenshot "07-ending.png"
     click "ПРОДОЛЖИТЬ"
 
     advance until screen "main_menu" timeout 90
