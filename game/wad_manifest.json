@@ -1,6 +1,6 @@
 {
   "tool_version": "1.0.0",
-  "generated_at": "2026-11-11T22:36:13Z",
+  "generated_at": "2026-11-12T15:25:41Z",
   "iwad": {
     "file": "doom2.wad",
     "magic": "IWAD",
@@ -144,53 +144,61 @@
       "lump": "D_DM2TTL",
       "file": "title.ogg",
       "notes": 184,
-      "seconds": 10.3
+      "seconds": 10.3,
+      "pcm_sha256": "1a1342bd123db5c5aafd62cf4375b346d1845ecf6a7560ba6b32c50c1d5b87ae"
     },
     "music_map": {
       "lump": "D_RUNNIN",
       "file": "map.ogg",
       "notes": 4939,
-      "seconds": 232.2
+      "seconds": 232.2,
+      "pcm_sha256": "b88aac7d77738d09538fc22b2cdbedce0e2566765bd0a76d3b2ff6981634ec7d"
     },
     "music_office": {
       "lump": "D_SHAWN",
       "file": "office.ogg",
       "notes": 4266,
-      "seconds": 259.5
+      "seconds": 259.5,
+      "pcm_sha256": "767558f6ddbe8f287d6b029528d2e444cb5d7cc2149b8f34ea072daec0cf9dcd"
     },
     "music_chase": {
       "lump": "D_DOOM",
       "file": "chase.ogg",
       "notes": 2704,
-      "seconds": 261.0
+      "seconds": 261.0,
+      "pcm_sha256": "fde330d02714c900228a0bd55fc6b354df1803a8cdfc3956425a16e8f36adda4"
     },
     "music_hell": {
       "lump": "D_THE_DA",
       "file": "hell.ogg",
       "notes": 3297,
-      "seconds": 300.0
+      "seconds": 300.0,
+      "pcm_sha256": "aa569ccce52344a04fee0d8719deb7f091e3bf6e22964b824adab2507764dac4"
     },
     "music_boss": {
       "lump": "D_OPENIN",
       "file": "boss.ogg",
       "notes": 1565,
-      "seconds": 281.8
+      "seconds": 281.8,
+      "pcm_sha256": "f2d0d18f64e49d6c4a067876934d6e6ee6216fa074d2fceadc4adbfecb25d46d"
     },
     "music_ending": {
       "lump": "D_READ_M",
       "file": "ending.ogg",
       "notes": 5573,
-      "seconds": 289.8
+      "seconds": 289.8,
+      "pcm_sha256": "b81a7d398d6040f51889871fcb6f512ab776fb8bddd7cec8bafe2c26c3b217a0"
     },
     "music_menu": {
       "lump": "D_DM2INT",
       "file": "menu.ogg",
       "notes": 3243,
-      "seconds": 174.2
+      "seconds": 174.2,
+      "pcm_sha256": "cf73f84117b1fdf3cc5926cc7c046ee1b72d3a091c5c9d1bc67270f0b25371c1"
     }
   },
   "fonts": {
-    "ttf_source": "DejaVuSans.ttf",
+    "ttf_source": "E:\\_DPT_Projects_E\\_Harness\\DOOM_Novell\\tools\\fonts\\DejaVuSans.ttf",
     "doom1": {
       "file": "fonts/doom1.fnt",
       "size": 14,
@@ -403,5 +411,5 @@
     "sounds": 14,
     "music": 8
   },
-  "elapsed_seconds": 109.8
+  "elapsed_seconds": 114.2
 }

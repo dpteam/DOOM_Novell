@@ -98,7 +98,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
-            xvfb libgl1 libgl1-mesa-dri libglu1-mesa
+            xvfb libgl1 libgl1-mesa-dri libglu1-mesa fonts-dejavu-core
 
       - name: Run the game end to end
         env:
@@ -184,7 +184,10 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
-            xvfb libgl1 libgl1-mesa-dri libglu1-mesa
+            xvfb libgl1 libgl1-mesa-dri libglu1-mesa fonts-dejavu-core
+
+      - name: Show which Cyrillic font the pipeline picked
+        run: python -c "import sys; sys.path.insert(0,'tools'); import importlib.util as u; s=u.spec_from_file_location('b','tools/build_assets.py'); m=u.module_from_spec(s); s.loader.exec_module(m); print('TTF ->', m.find_cyrillic_ttf())"
 
       - name: Lint and play the FreeDoom build
         env:

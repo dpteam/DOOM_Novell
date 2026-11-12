@@ -16,11 +16,14 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import shutil
 import subprocess
 import sys
 import time
 from pathlib import Path
+
+import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
@@ -281,16 +284,133 @@ def ensure_dir(path: Path) -> Path:
     return path
 
 
+# Files in game/gui that come from the Ren'Py template rather than the IWAD.
+# Everything else under game/gui is generated and may be pruned.
+GUI_KEEP = {"bubble.png", "thoughtbubble.png"}
+GUI_GENERATED_DIRS = ("button", "choice", "bar", "slider", "scrollbar", "overlay")
+
+
+def prune_generated(game: Path, keep_music: bool) -> None:
+    """Delete output from a previous build so the tree matches the manifest.
+
+    Without this, rebuilding from a different IWAD over an existing checkout
+    leaves stale files behind and `verify_assets.py` (rightly) complains that
+    the manifest and the disk disagree.  A build should be reproducible, so
+    anything this script owns gets removed first.
+
+    `keep_music` preserves game/audio/music when --skip-music was passed, so a
+    quick UI-only rebuild does not throw away a rendered soundtrack.
+    """
+    for name in ("images", "fonts"):
+        target = game / name
+        if target.is_dir():
+            shutil.rmtree(target)
+
+    sfx = game / "audio" / "sfx"
+    if sfx.is_dir():
+        shutil.rmtree(sfx)
+    if not keep_music:
+        music = game / "audio" / "music"
+        if music.is_dir():
+            shutil.rmtree(music)
+
+    gui = game / "gui"
+    if gui.is_dir():
+        for sub in GUI_GENERATED_DIRS:
+            target = gui / sub
+            if target.is_dir():
+                shutil.rmtree(target)
+        for item in gui.iterdir():
+            if item.is_file() and item.name not in GUI_KEEP:
+                item.unlink()
+
+
 def ffmpeg_available() -> bool:
     return shutil.which("ffmpeg") is not None
+
+
+# Candidates for a TTF with Cyrillic coverage, in priority order.  The copy
+# bundled with the repo wins: the Cyrillic bitmap fonts must be identical no
+# matter who runs the build or which platform they are on, otherwise every
+# rebuild would rewrite game/fonts with a different typeface.
+BUNDLED_TTF = Path(__file__).resolve().parent / "fonts" / "DejaVuSans.ttf"
+
+TTF_CANDIDATES = [
+    "renpy/common/DejaVuSans.ttf",
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+    "/usr/share/fonts/dejavu/DejaVuSans.ttf",
+    "/usr/share/fonts/TTF/DejaVuSans.ttf",
+    "/Library/Fonts/DejaVuSans.ttf",
+    "/System/Library/Fonts/Supplemental/Arial Unicode.ttf",
+    "C:/Windows/Fonts/DejaVuSans.ttf",
+    "C:/Windows/Fonts/segoeui.ttf",
+    "C:/Windows/Fonts/tahoma.ttf",
+]
+
+
+def find_cyrillic_ttf(explicit: str | None = None) -> Path | None:
+    """Locate a TrueType font that can render Russian.
+
+    Search order: the --ttf argument, the DOOM_NOVELL_TTF environment variable,
+    the DejaVu Sans bundled in tools/fonts (this is the normal path), a DejaVu
+    next to the Ren'Py SDK (RENPY_SDK / RENPY_SH), then the usual per-platform
+    font directories as a last resort.
+    """
+    if explicit:
+        path = Path(explicit).expanduser()
+        if path.exists():
+            return path
+        print(f"    ! --ttf {explicit} does not exist, falling back to discovery", file=sys.stderr)
+
+    from_env = os.environ.get("DOOM_NOVELL_TTF")
+    if from_env:
+        path = Path(from_env).expanduser()
+        if path.exists():
+            return path
+        print(f"    ! DOOM_NOVELL_TTF={from_env} does not exist, ignoring", file=sys.stderr)
+
+    if BUNDLED_TTF.exists():
+        return BUNDLED_TTF
+
+    # A Ren'Py SDK almost certainly contains DejaVuSans.ttf.
+    sdk_roots = []
+    for var in ("RENPY_SDK", "RENPY_BASE"):
+        value = os.environ.get(var)
+        if value:
+            sdk_roots.append(Path(value))
+    renpy_sh = os.environ.get("RENPY_SH")
+    if renpy_sh:
+        sdk_roots.append(Path(renpy_sh).resolve().parent)
+    for root in sdk_roots:
+        candidate = root / "renpy" / "common" / "DejaVuSans.ttf"
+        if candidate.exists():
+            return candidate
+
+    for name in TTF_CANDIDATES:
+        path = Path(name)
+        if path.exists():
+            return path
+
+    return None
 
 
 def to_ogg(wav_bytes: bytes, out_path: Path) -> bool:
     tmp = out_path.with_suffix(".tmp.wav")
     tmp.write_bytes(wav_bytes)
     try:
+        # `+bitexact` strips encoder version strings and timestamps from the
+        # container, so re-rendering the same score produces the same bytes
+        # instead of churning the repository on every rebuild.
         result = subprocess.run(
-            ["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-i", str(tmp), "-c:a", "libvorbis", "-q:a", "4", str(out_path)],
+            [
+                "ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
+                "-fflags", "+bitexact",
+                "-i", str(tmp),
+                "-c:a", "libvorbis", "-q:a", "4",
+                "-flags:a", "+bitexact",
+                "-map_metadata", "-1",
+                str(out_path),
+            ],
             capture_output=True,
         )
         return result.returncode == 0 and out_path.exists()
@@ -326,9 +446,26 @@ def framed_sprite(wad: Wad, prefix: str, mood: str, height: int) -> Image.Image 
 # ----------------------------------------------------------------- main build
 
 
-def build_music(wad: Wad, music_dir: Path, manifest: dict) -> None:
-    """Render every MUS/MIDI track in MUSIC into OGG (or WAV) files."""
+def pcm_hash(pcm16: np.ndarray) -> str:
+    """Stable fingerprint of the rendered audio (not of the encoded file)."""
+    return hashlib.sha256(pcm16.tobytes()).hexdigest()
+
+
+def build_music(wad: Wad, music_dir: Path, manifest: dict, previous: dict | None = None) -> None:
+    """Render every MUS/MIDI track in MUSIC into OGG (or WAV) files.
+
+    Re-encoding is skipped when the rendered audio is bit-identical to the
+    previous build (``previous`` is the old wad_manifest.json).  libvorbis
+    output is not reproducible, so without this every rebuild would rewrite
+    eight tracks and churn the repository.
+    """
     use_ogg = ffmpeg_available()
+
+    ## Accept either a full manifest ({"audio": {...}}) or the audio mapping
+    ## itself, so callers cannot get this wrong.
+    previous = previous or {}
+    if "audio" in previous and isinstance(previous["audio"], dict):
+        previous = previous["audio"]
     for key, names in MUSIC.items():
         lump = pick(wad, names)
         if lump is None:
@@ -352,20 +489,42 @@ def build_music(wad: Wad, music_dir: Path, manifest: dict) -> None:
             print(f"    ! music {key} ({lump}): {exc}")
             continue
 
-        if use_ogg and to_ogg(wav, music_dir / f"{key}.ogg"):
-            target = music_dir / f"{key}.ogg"
+        ogg_path = music_dir / f"{key}.ogg"
+        wav_path = music_dir / f"{key}.wav"
+
+        pcm = np.clip(stereo, -1.0, 1.0)
+        pcm16 = (pcm * 32767).astype("<i2").reshape(-1)
+        digest = pcm_hash(pcm16)
+
+        old = previous.get(f"music_{key}") or {}
+        reusable = (
+            old.get("pcm_sha256") == digest
+            and old.get("lump") == lump
+            and (music_dir / str(old.get("file", ""))).exists()
+        )
+
+        if reusable:
+            target = music_dir / old["file"]
+            note = "unchanged"
+        elif use_ogg and to_ogg(wav, ogg_path):
+            target = ogg_path
+            note = "encoded"
         else:
-            target = music_dir / f"{key}.wav"
-            target.write_bytes(wav)
+            wav_path.write_bytes(wav)
+            target = wav_path
+            note = "wav"
+
         manifest["audio"][f"music_{key}"] = {
             "lump": lump,
             "file": target.name,
             "notes": len(song),
             "seconds": round(len(stereo) / wad_audio.SAMPLE_RATE, 1),
+            "pcm_sha256": digest,
         }
         print(
             f"    {key:8s} {lump:10s} {len(song):5d} notes "
-            f"{len(stereo) / wad_audio.SAMPLE_RATE:6.1f}s  ({time.time() - started:.1f}s render)"
+            f"{len(stereo) / wad_audio.SAMPLE_RATE:6.1f}s  "
+            f"({time.time() - started:.1f}s render, {note})"
         )
 
 
@@ -379,6 +538,20 @@ def build(args: argparse.Namespace) -> int:
     wad = Wad(iwad_path)
     root = Path(args.out).expanduser().resolve()
     game = root / "game"
+
+    print(f"[0/6] clearing output from a previous build")
+    prune_generated(game, keep_music=args.skip_music)
+
+    ## Read the manifest before it is overwritten: build_music uses it to tell
+    ## which tracks are already rendered and can be left alone.
+    previous_manifest: dict = {}
+    old_manifest_path = game / "wad_manifest.json"
+    if old_manifest_path.exists():
+        try:
+            previous_manifest = json.loads(old_manifest_path.read_text(encoding="utf-8"))
+        except Exception:
+            previous_manifest = {}
+
     images = {name: ensure_dir(game / "images" / name) for name in ("bg", "chars", "items", "maps", "ui", "fx")}
     gui = ensure_dir(game / "gui")
     for sub in ("button", "choice", "bar", "slider", "scrollbar", "overlay"):
@@ -586,22 +759,23 @@ def build(args: argparse.Namespace) -> int:
         patch_font(wad, fonts_dir / f"{key}.fnt", fonts_dir / f"{key}_0.png", scale=scale, name=key)
         font_specs.append((key, fonts_dir / f"{key}.fnt", scale * 7))
 
-    ttf = Path(args.ttf).expanduser() if args.ttf else None
-    if ttf is None or not ttf.exists():
-        candidates = [
-            Path(r"E:\_DPT_Projects_E\_RenPy\renpy-8.2.0-sdk\renpy\common\DejaVuSans.ttf"),
-            Path("C:/Windows/Fonts/segoeui.ttf"),
-            Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"),
-        ]
-        ttf = next((p for p in candidates if p.exists()), None)
+    ttf = find_cyrillic_ttf(args.ttf)
     if ttf is None:
-        print("    ! no TTF found; Cyrillic text will not render")
-    else:
-        for size in (20, 26, 32, 44):
-            key = f"cyr{size}"
-            ttf_font(ttf, fonts_dir / f"{key}.fnt", fonts_dir / f"{key}_0.png", size=size, name=key)
-            font_specs.append((key, fonts_dir / f"{key}.fnt", size))
-        manifest["fonts"]["ttf_source"] = ttf.name
+        print(
+            "    ! no TTF with Cyrillic found. The game is in Russian, so this is fatal.\n"
+            "      Pass --ttf PATH, or set DOOM_NOVELL_TTF, or install a DejaVu font:\n"
+            "        Debian/Ubuntu: sudo apt-get install fonts-dejavu-core\n"
+            "        macOS:         brew install --cask font-dejavu",
+            file=sys.stderr,
+        )
+        return 3
+
+    print(f"    cyrillic source: {ttf}")
+    for size in (20, 26, 32, 44):
+        key = f"cyr{size}"
+        ttf_font(ttf, fonts_dir / f"{key}.fnt", fonts_dir / f"{key}_0.png", size=size, name=key)
+        font_specs.append((key, fonts_dir / f"{key}.fnt", size))
+    manifest["fonts"]["ttf_source"] = str(ttf)
 
     font_table = {}
     for key, fnt_path, size in font_specs:
@@ -631,7 +805,7 @@ def build(args: argparse.Namespace) -> int:
         manifest["audio"][f"sfx_{key}"] = lump
 
     if not args.skip_music:
-        build_music(wad, music_dir, manifest)
+        build_music(wad, music_dir, manifest, previous_manifest)
 
     # ------------------------------------------------------------------- icon
     print("[icon] application icon")
@@ -660,12 +834,17 @@ def build(args: argparse.Namespace) -> int:
     manifest["art"]["icon"] = "icon.ico"
 
     # -------------------------------------------------------------- manifest
+    ## Music may be kept from a previous build (--skip-music), in which case the
+    ## manifest should describe what is actually on disk rather than what this
+    ## run rendered.  verify_assets.py compares the two, so they must agree.
+    music_on_disk = len(list(music_dir.glob("*.*"))) if music_dir.is_dir() else 0
+
     manifest["counts"] = {
         "characters": len(CHARACTERS),
         "scenes": len([k for k in manifest["art"] if k.startswith("bg_")]),
         "maps": len(manifest["maps"]),
         "sounds": len([k for k in manifest["audio"] if k.startswith("sfx_")]),
-        "music": len([k for k in manifest["audio"] if k.startswith("music_")]),
+        "music": music_on_disk,
     }
     manifest["elapsed_seconds"] = round(time.time() - started, 1)
     (game / "wad_manifest.json").write_text(
@@ -691,10 +870,29 @@ def main(argv=None) -> int:
     if args.music_only:
         iwad_path = Path(args.iwad).expanduser().resolve()
         wad = Wad(iwad_path)
-        music_dir = ensure_dir(Path(args.out).expanduser().resolve() / "game" / "audio" / "music")
+        game_dir = Path(args.out).expanduser().resolve() / "game"
+        music_dir = ensure_dir(game_dir / "audio" / "music")
+
+        ## Reuse the existing manifest so unchanged tracks are not re-encoded.
+        manifest_path = game_dir / "wad_manifest.json"
+        previous: dict = {}
+        if manifest_path.exists():
+            try:
+                previous = json.loads(manifest_path.read_text(encoding="utf-8"))
+            except Exception:
+                previous = {}
+
         manifest: dict = {"audio": {}}
         print(wad.banner())
-        build_music(wad, music_dir, manifest)
+        build_music(wad, music_dir, manifest, previous)
+
+        ## Merge the refreshed audio entries back into the manifest.
+        if manifest_path.exists():
+            merged = json.loads(manifest_path.read_text(encoding="utf-8"))
+            merged.setdefault("audio", {}).update(manifest["audio"])
+            merged.setdefault("counts", {})["music"] = len(list(music_dir.glob("*.*")))
+            manifest_path.write_text(json.dumps(merged, indent=2, ensure_ascii=False), encoding="utf-8")
+            print(f"  updated  {manifest_path}")
         return 0
 
     return build(args)
